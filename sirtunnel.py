@@ -7,10 +7,14 @@ from urllib import request
 
 
 if __name__ == '__main__':
-
-    host = sys.argv[1]
-    port = sys.argv[2]
+    args = sys.argv[2].split(' ')
+    host = args[0] + ".tun.domain"
+    port = args[1]
     tunnel_id = host + '-' + port
+    
+    if not 40000 <= int(port) <= 49999:
+        print("Invalid port, must use range 40000-49999")
+        sys.exit(1)
 
     caddy_add_route_request = {
         "@id": tunnel_id,
@@ -20,7 +24,7 @@ if __name__ == '__main__':
         "handle": [{
             "handler": "reverse_proxy",
             "upstreams":[{
-                "dial": ':' + port
+                "dial": '172.17.0.1:' + port
             }]
         }]
     }
@@ -29,7 +33,7 @@ if __name__ == '__main__':
     headers = {
         'Content-Type': 'application/json'
     }
-    create_url = 'http://127.0.0.1:2019/config/apps/http/servers/sirtunnel/routes'
+    create_url = 'http://127.0.0.1:2019/config/apps/http/servers/srv0/routes'
     req = request.Request(method='POST', url=create_url, headers=headers)
     request.urlopen(req, body)
 
